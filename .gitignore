@@ -1,26 +1,9 @@
-# Charmcraft build artifacts
-*.charm
+venv/
 build/
-*.snap
-
-# Python
+*.charm
+.tox/
+.coverage
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-dist/
-venv/
-.venv/
-
-# IDE
+.idea
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
