@@ -25,7 +25,7 @@ NGINX_SITE_CONFIG = """server {
 """
 
 
-class SimplestreamsMaasMirrorCharm(CharmBase):
+class MaasImageMirrorCharm(CharmBase):
     """Charm for MAAS simplestreams image mirror."""
 
     def __init__(self, *args):
@@ -84,10 +84,6 @@ class SimplestreamsMaasMirrorCharm(CharmBase):
             logger.info("Enabling image-mirror site")
             site_enabled.symlink_to(site_config_path)
         
-        # # Ensure the web root directory exists (commented out; not sure this is needed)
-        # web_root = Path("/var/www/html/maas/images/ephemeral-v3/stable")
-        # web_root.mkdir(parents=True, exist_ok=True)
-        
         # Reload nginx configuration
         logger.info("Reloading nginx")
         subprocess.check_call(["systemctl", "reload", "nginx"])
@@ -141,4 +137,4 @@ class SimplestreamsMaasMirrorCharm(CharmBase):
 
 
 if __name__ == "__main__":
-    main(SimplestreamsMaasMirrorCharm)
+    main(MaasImageMirrorChaarm)
