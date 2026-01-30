@@ -5,6 +5,7 @@
 """Charm for setting up a MAAS simplestreams image mirror with nginx."""
 
 import logging
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -88,6 +89,56 @@ class MaasImageMirrorCharm(CharmBase):
         logger.info("Reloading nginx")
         subprocess.check_call(["systemctl", "reload", "nginx"])
 
+    def _parse_cron_commands(self, cron_jobs):
+        """Extract commands from cron job entries.
+        
+        Args:
+            cron_jobs: String containing cron job entries
+            
+        Returns:
+            List of command strings extracted from the cron entries
+        """
+        commands = []
+        for line in cron_jobs.strip().split('\n'):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            
+            # Cron format: minute hour day-of-month month day-of-week command
+            # Split on whitespace, then grab the final portion to execute
+            parts = line.split(None, 5)
+            if len(parts) >= 6:
+                command = parts[5]
+                commands.append(command)
+            else:
+                logger.warning(f"Skipping invalid cron entry: {line}")
+        
+        return commands
+    
+    def _run_bootstrap_sync(self, cron_jobs):
+        """Run configured cron job commands sequentially.
+        
+        Args:
+            cron_jobs: String containing cron job entries
+        """
+        commands = self._parse_cron_commands(cron_jobs)
+        
+        if not commands:
+            logger.info("No commands to run for bootstrap sync")
+            return
+        
+        logger.info(f"Running bootstrap sync for {len(commands)} command(s)")
+        
+        for idx, command in enumerate(commands, 1):
+            logger.info(f"Running bootstrap command {idx}/{len(commands)}: {command}")
+            try:
+                # Run the command using shell to properly handle arguments
+                subprocess.check_call(command, shell=True)
+                logger.info(f"Bootstrap command {idx} completed successfully")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Bootstrap command {idx} failed with exit code {e.returncode}")
+                # Continue with remaining commands even if one fails
+    
     def _configure_cron(self):
         """Configure cron jobs for root user."""
         cron_jobs = self.config.get("cron-jobs", "").strip()
@@ -95,6 +146,12 @@ class MaasImageMirrorCharm(CharmBase):
         if not cron_jobs:
             logger.info("No cron jobs configured")
             return
+        
+        # Run bootstrap sync if enabled
+        bootstrap_sync = self.config.get("bootstrap-sync", True)
+        if bootstrap_sync:
+            self.unit.status = MaintenanceStatus("Running bootstrap sync")
+            self._run_bootstrap_sync(cron_jobs)
         
         logger.info("Configuring cron jobs")
         
@@ -137,4 +194,4 @@ class MaasImageMirrorCharm(CharmBase):
 
 
 if __name__ == "__main__":
-    main(MaasImageMirrorChaarm)
+    main(MaasImageMirrorCharm)
