@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2021 Canonical Ltd.
+# Copyright 2026 Canonical Ltd.
 # SPDX-License-Identifier: Apache-2.0
 
 """Charm for setting up a MAAS simplestreams image mirror with nginx."""
