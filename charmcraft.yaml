@@ -1,5 +1,5 @@
 type: charm
-name: simplestreams-maas-mirror
+name: maas-image-mirror
 summary: A machine charm for mirroring MAAS images with nginx
 description: |
   This charm deploys an nginx web server configured to serve MAAS
