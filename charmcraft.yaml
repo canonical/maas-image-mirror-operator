@@ -1,0 +1,34 @@
+type: charm
+name: simplestreams-maas-mirror
+summary: A machine charm for mirroring MAAS images with nginx
+description: |
+  This charm deploys an nginx web server configured to serve MAAS
+  simplestreams image mirrors. It sets up automated synchronization
+  using cron jobs to keep the mirror up to date.
+
+bases:
+  - build-on:
+      - name: ubuntu
+        channel: "24.04"
+    run-on:
+      - name: ubuntu
+        channel: "24.04"
+
+config:
+  options:
+    cron-jobs:
+      type: string
+      description: |
+        Multiline text containing cron job entries to install for the root user.
+        Each line should be a valid cron entry in the format:
+        minute hour day-of-month month day-of-week command
+      default: |
+        0 */2 * * 0 sstream-mirror --keyring=/usr/share/keyrings/ubuntu-cloudimage-keyring.gpg https://images.maas.io/ephemeral-v3/stable /var/www/html/maas/images/ephemeral-v3/stable 'arch=amd64' 'release~(focal|jammy|noble)' --max=1 --progress
+        5 */2 * * 0 sstream-mirror --keyring=/usr/share/keyrings/ubuntu-cloudimage-keyring.gpg https://images.maas.io/ephemeral-v3/stable /var/www/html/maas/images/ephemeral-v3/stable 'os~(grub*|pxelinux)' --max=1 --progress
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+    charm-binary-python-packages:
+      - ops
