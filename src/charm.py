@@ -55,6 +55,13 @@ class MaasImageMirrorCharm(CharmBase):
             # Configure nginx
             self._configure_nginx()
             
+            # Run bootstrap sync if enabled
+            bootstrap_sync = self.config.get("bootstrap-sync", True)
+            cron_jobs = self.config.get("cron-jobs", "").strip()
+            if bootstrap_sync and cron_jobs:
+                self.unit.status = MaintenanceStatus("Running bootstrap sync")
+                self._run_bootstrap_sync(cron_jobs)
+            
             # Set up cron jobs
             self._configure_cron()
             
@@ -146,12 +153,6 @@ class MaasImageMirrorCharm(CharmBase):
         if not cron_jobs:
             logger.info("No cron jobs configured")
             return
-        
-        # Run bootstrap sync if enabled
-        bootstrap_sync = self.config.get("bootstrap-sync", True)
-        if bootstrap_sync:
-            self.unit.status = MaintenanceStatus("Running bootstrap sync")
-            self._run_bootstrap_sync(cron_jobs)
         
         logger.info("Configuring cron jobs")
         
