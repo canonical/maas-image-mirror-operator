@@ -27,6 +27,7 @@ config:
     bootstrap-sync:
       type: boolean
       description: |
+        Only observed on initial deploy.
         If true, perform an initial sequential run of all configured cron jobs
         before installing them to the root user's crontab. This ensures the
         mirror has initial data before the scheduled cron jobs take over.
