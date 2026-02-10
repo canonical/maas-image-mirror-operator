@@ -25,6 +25,8 @@ NGINX_SITE_CONFIG = """server {
 }
 """
 
+OPEN_PORTS = [80]
+
 
 class MaasImageMirrorCharm(CharmBase):
     """Charm for MAAS simplestreams image mirror."""
@@ -177,6 +179,8 @@ class MaasImageMirrorCharm(CharmBase):
         try:
             # Reconfigure cron jobs when config changes
             self._configure_cron()
+            # Declare our open ports (currently hardcoded)
+            self.unit.set_ports(*OPEN_PORTS)
             self.unit.status = ActiveStatus("Ready")
         except Exception as e:
             logger.error(f"Failed to update configuration: {e}")
